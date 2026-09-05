@@ -1,25 +1,33 @@
+'use client';
+
 import React from 'react';
+import PageHeader from '@/components/PageHeader';
+import DataTable from '@/components/DataTable';
+import { Download } from 'lucide-react';
+
+const mockReports = [
+  { id: 1, name: 'Monthly Sales Report', date: '01 Jun 2025', size: '2.4 MB', type: 'PDF' },
+  { id: 2, name: 'Inventory Valuation', date: '28 May 2025', size: '1.1 MB', type: 'CSV' },
+  { id: 3, name: 'Tax Summary Q2', date: '15 May 2025', size: '3.5 MB', type: 'PDF' },
+];
+
+const columns = [
+  { key: 'name', label: 'Report Name', render: (val: string) => <span className="font-bold text-gray-800">{val}</span> },
+  { key: 'date', label: 'Generated On' },
+  { key: 'type', label: 'Format', render: (val: string) => <span className="px-2 py-1 bg-gray-100 rounded text-xs font-bold">{val}</span> },
+  { key: 'size', label: 'Size' },
+];
 
 export default function ReportsPage() {
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage your reports here.</p>
-        </div>
-        <button className="bg-[#4F46E5] text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-indigo-700">
-          Add New
-        </button>
-      </div>
-
-      <div className="bg-white rounded-xl border border-gray-100 p-8 shadow-sm flex flex-col items-center justify-center min-h-[400px]">
-        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-          <span className="text-gray-400 text-2xl">📋</span>
-        </div>
-        <h2 className="text-lg font-bold text-gray-900">No reports found</h2>
-        <p className="text-sm text-gray-500 mt-1 max-w-sm text-center">This section is currently empty. Start by adding some data to see it here.</p>
-      </div>
+    <div>
+      <PageHeader title="Reports" description="Download and manage system reports." onAdd={() => {}} addLabel="Generate Report" />
+      <DataTable 
+        columns={columns} 
+        data={mockReports} 
+        searchPlaceholder="Search reports..." 
+        onEdit={(item) => alert('Downloading ' + item.name)} 
+      />
     </div>
   );
 }

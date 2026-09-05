@@ -12,11 +12,11 @@ const metricCards = [
 ];
 
 const topProducts = [
-  { id: 1, name: 'ঐতিহ্যবাহী জামদানি শাড়ি', sold: 320, revenue: '৳ 256,000', img: 'https://images.unsplash.com/photo-1610030469983-98e550d61dc0?q=80&w=150&auto=format&fit=crop' },
-  { id: 2, name: 'কটন পাঞ্জাবি', sold: 280, revenue: '৳ 140,000', img: 'https://images.unsplash.com/photo-1596200234710-388fc4eb3d96?q=80&w=150&auto=format&fit=crop' },
-  { id: 3, name: 'নকশী কাঁথা (ডাবল)', sold: 210, revenue: '৳ 105,000', img: 'https://images.unsplash.com/photo-1618220179428-22790b46a0eb?q=80&w=150&auto=format&fit=crop' },
-  { id: 4, name: 'মাটির হাঁড়ি সেট', sold: 180, revenue: '৳ 72,000', img: 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?q=80&w=150&auto=format&fit=crop' },
-  { id: 5, name: 'বাঁশের ঝুড়ি (বড়)', sold: 160, revenue: '৳ 48,000', img: 'https://images.unsplash.com/photo-1601391515237-7c0b0a8ebbd6?q=80&w=150&auto=format&fit=crop' },
+  { id: 1, name: 'ঐতিহ্যবাহী জামদানি শাড়ি', sold: 320, revenue: '৳ 256,000', img: 'https://placehold.co/150x150/F3F4F6/9CA3AF?text=Product' },
+  { id: 2, name: 'কটন পাঞ্জাবি', sold: 280, revenue: '৳ 140,000', img: 'https://placehold.co/150x150/F3F4F6/9CA3AF?text=Product' },
+  { id: 3, name: 'নকশী কাঁথা (ডাবল)', sold: 210, revenue: '৳ 105,000', img: 'https://placehold.co/150x150/F3F4F6/9CA3AF?text=Product' },
+  { id: 4, name: 'মাটির হাঁড়ি সেট', sold: 180, revenue: '৳ 72,000', img: 'https://placehold.co/150x150/F3F4F6/9CA3AF?text=Product' },
+  { id: 5, name: 'বাঁশের ঝুড়ি (বড়)', sold: 160, revenue: '৳ 48,000', img: 'https://placehold.co/150x150/F3F4F6/9CA3AF?text=Product' },
 ];
 
 const recentOrders = [

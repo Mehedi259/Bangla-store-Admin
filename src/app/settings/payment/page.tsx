@@ -1,24 +1,36 @@
+'use client';
+
 import React from 'react';
+import PageHeader from '@/components/PageHeader';
 
-export default function PaymentMethodsPage() {
+export default function PaymentSettingsPage() {
+  const methods = [
+    { name: 'Cash on Delivery (COD)', description: 'Allow customers to pay in cash upon delivery.', active: true },
+    { name: 'bKash (Automated)', description: 'Receive payments automatically via bKash merchant API.', active: true },
+    { name: 'Nagad', description: 'Manual or automated Nagad payments.', active: true },
+    { name: 'SSLCommerz', description: 'Credit cards, debit cards, and net banking support.', active: false },
+    { name: 'Stripe', description: 'International credit card processing.', active: false },
+  ];
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Payment Methods</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage your payment methods here.</p>
-        </div>
-        <button className="bg-[#4F46E5] text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-indigo-700">
-          Add New
-        </button>
-      </div>
-
-      <div className="bg-white rounded-xl border border-gray-100 p-8 shadow-sm flex flex-col items-center justify-center min-h-[400px]">
-        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-          <span className="text-gray-400 text-2xl">📋</span>
-        </div>
-        <h2 className="text-lg font-bold text-gray-900">No payment methods found</h2>
-        <p className="text-sm text-gray-500 mt-1 max-w-sm text-center">This section is currently empty. Start by adding some data to see it here.</p>
+    <div className="space-y-6 max-w-4xl">
+      <PageHeader title="Payment Methods" description="Configure how your store accepts payments." />
+      
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm divide-y divide-gray-100">
+        {methods.map((method, idx) => (
+          <div key={idx} className="p-6 flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-bold text-gray-900">{method.name}</h3>
+              <p className="text-sm text-gray-500 mt-1">{method.description}</p>
+            </div>
+            
+            {/* Toggle Switch */}
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" className="sr-only peer" defaultChecked={method.active} />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#4F46E5]"></div>
+            </label>
+          </div>
+        ))}
       </div>
     </div>
   );

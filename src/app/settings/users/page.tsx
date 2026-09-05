@@ -1,25 +1,41 @@
+'use client';
+
 import React from 'react';
+import PageHeader from '@/components/PageHeader';
+import DataTable from '@/components/DataTable';
 
-export default function UsersAndRolesPage() {
+const mockUsers = [
+  { id: 1, name: 'Mehedi Hasan', email: 'mehedi@example.com', role: 'Super Admin', status: 'Active' },
+  { id: 2, name: 'Taufiq Rahman', email: 'taufiq@example.com', role: 'Manager', status: 'Active' },
+  { id: 3, name: 'Sarah Islam', email: 'sarah@example.com', role: 'Editor', status: 'Inactive' },
+];
+
+const columns = [
+  { key: 'name', label: 'Name', render: (val: string) => <span className="font-bold text-gray-800">{val}</span> },
+  { key: 'email', label: 'Email' },
+  { 
+    key: 'role', 
+    label: 'Role',
+    render: (val: string) => (
+      <span className="px-2 py-1 bg-indigo-50 text-indigo-700 rounded font-medium text-xs border border-indigo-100">{val}</span>
+    )
+  },
+  { 
+    key: 'status', 
+    label: 'Status', 
+    render: (val: string) => (
+      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${val === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-700'}`}>
+        {val}
+      </span>
+    ) 
+  },
+];
+
+export default function UsersSettingsPage() {
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Users & Roles</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage your users & roles here.</p>
-        </div>
-        <button className="bg-[#4F46E5] text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-indigo-700">
-          Add New
-        </button>
-      </div>
-
-      <div className="bg-white rounded-xl border border-gray-100 p-8 shadow-sm flex flex-col items-center justify-center min-h-[400px]">
-        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-          <span className="text-gray-400 text-2xl">📋</span>
-        </div>
-        <h2 className="text-lg font-bold text-gray-900">No users & roles found</h2>
-        <p className="text-sm text-gray-500 mt-1 max-w-sm text-center">This section is currently empty. Start by adding some data to see it here.</p>
-      </div>
+    <div>
+      <PageHeader title="Users & Roles" description="Manage admin dashboard access and permissions." onAdd={() => {}} addLabel="Add User" />
+      <DataTable columns={columns} data={mockUsers} searchPlaceholder="Search users..." onEdit={() => {}} onDelete={() => {}} />
     </div>
   );
 }
