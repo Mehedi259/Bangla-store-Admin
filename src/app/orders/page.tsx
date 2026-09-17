@@ -1,23 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PageHeader from '@/components/PageHeader';
 import DataTable from '@/components/DataTable';
 
-const mockOrders = [
-  { id: '#BS-250617', date: '17 Jun 2025, 10:45 AM', customer: 'Taufiq Rahman', total: '৳ 2,650', payment: 'bKash', status: 'Delivered' },
-  { id: '#BS-250616', date: '17 Jun 2025, 09:30 AM', customer: 'Nusrat Jahan', total: '৳ 1,850', payment: 'Nagad', status: 'Processing' },
-  { id: '#BS-250615', date: '16 Jun 2025, 08:15 PM', customer: 'Imran Hossain', total: '৳ 3,450', payment: 'COD', status: 'Shipped' },
-  { id: '#BS-250614', date: '16 Jun 2025, 02:20 PM', customer: 'Farhana Akter', total: '৳ 950', payment: 'bKash', status: 'Delivered' },
-  { id: '#BS-250613', date: '15 Jun 2025, 11:10 AM', customer: 'Mahmudul Hasan', total: '৳ 1,280', payment: 'Nagad', status: 'Cancelled' },
-];
-
 const columns = [
   { key: 'id', label: 'Order ID', render: (val: string) => <span className="font-medium text-[#4F46E5]">{val}</span> },
-  { key: 'date', label: 'Date' },
-  { key: 'customer', label: 'Customer', render: (val: string) => <span className="font-medium text-gray-800">{val}</span> },
-  { key: 'total', label: 'Total', render: (val: string) => <span className="font-medium text-gray-800">{val}</span> },
-  { key: 'payment', label: 'Payment' },
+  { key: 'created_at', label: 'Date', render: (val: string) => <span>{new Date(val).toLocaleString()}</span> },
+  { key: 'customer_name', label: 'Customer', render: (val: string) => <span className="font-medium text-gray-800">{val}</span> },
+  { key: 'amount', label: 'Total', render: (val: string) => <span className="font-medium text-gray-800">৳ {val}</span> },
+  { key: 'payment_method', label: 'Payment' },
   { 
     key: 'status', 
     label: 'Status', 
@@ -33,10 +25,19 @@ const columns = [
 ];
 
 export default function OrdersPage() {
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/orders/')
+      .then(res => res.json())
+      .then(data => setOrders(data))
+      .catch(console.error);
+  }, []);
+
   return (
     <div>
-      <PageHeader title="Orders" description="Manage and track all customer orders." onAdd={() => alert('Create order')} addLabel="Create Order" />
-      <DataTable columns={columns} data={mockOrders} searchPlaceholder="Search by Order ID or Customer..." onEdit={() => {}} onDelete={() => {}} />
+      <PageHeader title="Orders" description="Manage and track all customer orders." onAdd={() => alert('Create order feature coming soon!')} addLabel="Create Order" />
+      <DataTable columns={columns} data={orders} searchPlaceholder="Search by Order ID or Customer..." onEdit={() => {}} onDelete={() => {}} />
     </div>
   );
 }
