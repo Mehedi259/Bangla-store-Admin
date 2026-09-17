@@ -16,35 +16,6 @@ const menuGroups = [
     items: [
       { name: 'Orders', icon: ShoppingCart, path: '/orders' },
       { name: 'Products', icon: Package, path: '/products' },
-      { name: 'Categories', icon: Layers, path: '/categories' },
-      { name: 'Customers', icon: Users, path: '/customers' },
-      { name: 'Coupons', icon: Ticket, path: '/coupons' },
-      { name: 'Reviews', icon: Star, path: '/reviews' },
-    ]
-  },
-  {
-    title: 'SALES',
-    items: [
-      { name: 'Analytics', icon: BarChart2, path: '/analytics' },
-      { name: 'Reports', icon: FileText, path: '/reports' },
-      { name: 'Transactions', icon: CreditCard, path: '/transactions' },
-    ]
-  },
-  {
-    title: 'CONTENT',
-    items: [
-      { name: 'Banners', icon: ImageIcon, path: '/banners' },
-      { name: 'Pages', icon: File, path: '/pages' },
-      { name: 'Blog', icon: Edit3, path: '/blog' },
-    ]
-  },
-  {
-    title: 'SETTINGS',
-    items: [
-      { name: 'Store Settings', icon: Settings, path: '/settings/store' },
-      { name: 'Users & Roles', icon: UserCheck, path: '/settings/users' },
-      { name: 'Payment Methods', icon: Wallet, path: '/settings/payment' },
-      { name: 'Shipping Methods', icon: Truck, path: '/settings/shipping' },
     ]
   }
 ];

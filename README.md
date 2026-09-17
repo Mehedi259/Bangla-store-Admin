@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bangla Store Admin Dashboard
+
+The Admin Dashboard for Bangla Store, focused on extreme simplicity and ease of use. This panel is meant to manage the core functionalities of the eCommerce platform without overwhelming the user with complex, unused features.
+
+## Philosophy
+
+The goal of this dashboard is **simplicity**. It deliberately strips away overly complex features like deep analytics, blogging features, coupon management, or advanced configurations to focus entirely on day-to-day operations:
+- Seeing high-level metrics on the dashboard (Revenue, Orders, Customers, Products).
+- Managing Products (Uploading, editing, tracking inventory).
+- Managing Orders (Tracking statuses, fulfillment).
+
+## Tech Stack
+
+- **Framework**: Next.js 16+
+- **Styling**: Tailwind CSS, Recharts (for dashboard graphs), Lucide React (for icons)
+- **Language**: TypeScript
 
 ## Getting Started
 
-First, run the development server:
+First, install the dependencies:
+
+```bash
+npm install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to view the Admin panel.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Dashboard**: High-level insights featuring key metrics, recent orders, and top-selling products.
+- **Orders**: Simple interface to view order details and update fulfillment statuses.
+- **Products**: Minimalist interface to upload and manage the product catalog.
 
-## Learn More
+## Customization
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The codebase has been specifically trimmed down. If new sections (e.g., Categories, Customers, Analytics) are required in the future, they should be built with the same design philosophy of keeping things highly functional yet simple.
