@@ -1,42 +1,93 @@
-# Bangla Store Admin Dashboard
+<div align="center">
 
-The Admin Dashboard for Bangla Store, focused on extreme simplicity and ease of use. This panel is meant to manage the core functionalities of the eCommerce platform without overwhelming the user with complex, unused features.
+# ⚙️ Bangla Store — Admin Dashboard
 
-## Philosophy
+**A clean and minimal admin panel for managing the Bangla Store eCommerce platform.**
 
-The goal of this dashboard is **simplicity**. It deliberately strips away overly complex features like deep analytics, blogging features, coupon management, or advanced configurations to focus entirely on day-to-day operations:
-- Seeing high-level metrics on the dashboard (Revenue, Orders, Customers, Products).
-- Managing Products (Uploading, editing, tracking inventory).
-- Managing Orders (Tracking statuses, fulfillment).
+[![Next.js](https://img.shields.io/badge/Next.js-16+-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3+-38bdf8?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)](https://docker.com)
 
-## Tech Stack
+</div>
 
-- **Framework**: Next.js 16+
-- **Styling**: Tailwind CSS, Recharts (for dashboard graphs), Lucide React (for icons)
+---
+
+## ✨ Features
+
+| Feature | Description |
+|---|---|
+| 📊 **Dashboard** | Real-time metrics: Total Revenue, Orders, Customers, Products fetched from the backend API |
+| 📦 **Orders** | View, filter, and update order statuses (Pending → Processing → Shipped → Delivered → Cancelled) |
+| 🛒 **Products** | Add, edit, delete products with image upload support |
+| 🗂️ **Categories** | Full CRUD for product categories including image uploads |
+| 👥 **Customers** | View customer information |
+| ⚙️ **Settings** | Basic store settings |
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 16+](https://nextjs.org) (App Router)
 - **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Charts**: Recharts (for sales graphs)
+- **Icons**: Lucide React
+- **API**: Django REST Framework backend at `http://167.233.34.127:8000`
 
-## Getting Started
+---
 
-First, install the dependencies:
+## 📁 Project Structure
 
-```bash
-npm install
+```
+src/
+├── app/
+│   ├── page.tsx              # Dashboard with real API metrics
+│   ├── orders/               # Order management (list + edit status)
+│   ├── products/             # Product CRUD with image upload
+│   ├── categories/           # Category CRUD with image upload
+│   ├── customers/            # Customer list
+│   └── settings/             # Store settings
+└── components/
+    ├── Sidebar.tsx           # Navigation sidebar
+    └── ...
 ```
 
-Then, run the development server:
+---
+
+## 🚀 Getting Started (Local Development)
+
+### Prerequisites
+- Node.js 20+
+- Backend running at `http://localhost:8000` (see [Bangla-store-Backend](https://github.com/Mehedi259/Bangla-store-Backend))
+
+### Setup
 
 ```bash
+# Clone the repository
+git clone https://github.com/Mehedi259/Bangla-store-Admin.git
+cd Bangla-store-Admin
+
+# Install dependencies
+npm install
+
+# Run the development server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to view the Admin panel.
+Open [http://localhost:3001](http://localhost:3001) in your browser.
 
-## Features
+---
 
-- **Dashboard**: High-level insights featuring key metrics, recent orders, and top-selling products.
-- **Orders**: Simple interface to view order details and update fulfillment statuses.
-- **Products**: Minimalist interface to upload and manage the product catalog.
+## 🔗 Related Repositories
 
-## Customization
+| Repo | Description |
+|---|---|
+| [Bangla-store](https://github.com/Mehedi259/Bangla-store) | Customer-facing frontend |
+| [Bangla-store-Backend](https://github.com/Mehedi259/Bangla-store-Backend) | Django REST API backend |
 
-The codebase has been specifically trimmed down. If new sections (e.g., Categories, Customers, Analytics) are required in the future, they should be built with the same design philosophy of keeping things highly functional yet simple.
+---
+
+## 📄 Deployment
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for full deployment instructions.

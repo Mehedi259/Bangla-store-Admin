@@ -11,15 +11,23 @@ const columns = [
   { 
     key: 'image', 
     label: 'Image', 
-    render: (val: string, item: any) => (
-      <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden">
-        {val ? (
-          <img src={val} alt={item.name} className="w-full h-full object-cover" />
-        ) : (
-          <Layers size={20} className="text-gray-400" />
-        )}
-      </div>
-    )
+    render: (val: string, item: any) => {
+      const getImageUrl = (url: string) => {
+        if (!url) return '';
+        if (url.startsWith('/images/')) return `http://167.233.34.127:3000${url}`;
+        if (url.startsWith('/media/')) return `http://167.233.34.127:8000${url}`;
+        return url;
+      };
+      return (
+        <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden">
+          {val ? (
+            <img src={getImageUrl(val)} alt={item.name} className="w-full h-full object-cover" />
+          ) : (
+            <Layers size={20} className="text-gray-400" />
+          )}
+        </div>
+      );
+    }
   },
   { key: 'name', label: 'Category Name', render: (val: string) => <span className="font-bold text-gray-900">{val}</span> },
   { key: 'icon', label: 'Icon (lucide)', render: (val: string) => <span className="text-gray-500 font-medium bg-gray-50 px-2 py-1 rounded">{val}</span> },
