@@ -1,22 +1,21 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Plus, Edit2, Trash2, Search, X, Package } from 'lucide-react';
 
 const API_URL = 'http://167.233.34.127:8000/api/products';
 
-const CATEGORIES = [
-  'Fresh Vegetables', 'Frozen Fish', 'Rice & Grains', 'Spices & Masala',
-  'Snacks & Biscuits', 'Beverages', 'Household', 'Sweets & Desserts',
-  'Meat & Poultry', 'Personal Care',
-];
+const emptyForm = { id: '', name: '', price: '', weight: '', image: '', category: '', isBestSeller: false, stock: 100, status: 'Active' };
 
-const emptyForm = { id: '', name: '', price: '', weight: '', image: '', category: CATEGORIES[0], isBestSeller: false, stock: 100, status: 'Active' };
-
-export default function ProductsPage() {
+function ProductsContent() {
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
   const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [filtered, setFiltered] = useState<any[]>([]);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch);
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
@@ -24,13 +23,21 @@ export default function ProductsPage() {
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<any>(null);
 
-  const fetchProducts = async () => {
+  const fetchProductsAndCategories = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/`);
-      const data = await res.json();
-      setProducts(data);
-      setFiltered(data);
+      const [resProducts, resCategories] = await Promise.all([
+        fetch(`${API_URL}/`),
+        fetch(`${API_URL}/categories/`)
+      ]);
+      const dataProducts = await resProducts.json();
+      const dataCategories = await resCategories.json();
+      setProducts(dataProducts);
+      setFiltered(dataProducts);
+      setCategories(dataCategories);
+      if (dataCategories.length > 0) {
+        emptyForm.category = dataCategories[0].name;
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -38,12 +45,16 @@ export default function ProductsPage() {
     }
   };
 
-  useEffect(() => { fetchProducts(); }, []);
+  useEffect(() => { fetchProductsAndCategories(); }, []);
 
   useEffect(() => {
     const q = search.toLowerCase();
-    setFiltered(products.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)));
-  }, [search, products]);
+    setFiltered(products.filter(p => {
+      const matchesSearch = p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
+      const matchesCategory = selectedCategory ? p.category === selectedCategory : true;
+      return matchesSearch && matchesCategory;
+    }));
+  }, [search, selectedCategory, products]);
 
   const openAdd = () => {
     setEditingProduct(null);
@@ -55,6 +66,36 @@ export default function ProductsPage() {
     setEditingProduct(product);
     setForm({ ...product, price: String(product.price) });
     setShowModal(true);
+  };
+
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const res = await fetch(`${API_URL}/upload/`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        // Django backend runs on 8000, so prepend the host to the relative media URL
+        const imageUrl = `http://167.233.34.127:8000${data.url}`;
+        setForm({ ...form, image: imageUrl });
+      } else {
+        alert('Image upload failed');
+      }
+    } catch (err) {
+      alert('Error uploading image');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSave = async () => {
@@ -77,7 +118,7 @@ export default function ProductsPage() {
           body: JSON.stringify({ ...payload, id: newId }),
         });
       }
-      if (res.ok) { setShowModal(false); fetchProducts(); }
+      if (res.ok) { setShowModal(false); fetchProductsAndCategories(); }
       else { alert('সেভ করা যায়নি: ' + await res.text()); }
     } catch (e) { alert('Error: ' + e); }
     finally { setSaving(false); }
@@ -86,7 +127,7 @@ export default function ProductsPage() {
   const handleDelete = async (product: any) => {
     try {
       const res = await fetch(`${API_URL}/${product.id}/`, { method: 'DELETE' });
-      if (res.ok || res.status === 204) { setDeleteConfirm(null); fetchProducts(); }
+      if (res.ok || res.status === 204) { setDeleteConfirm(null); fetchProductsAndCategories(); }
       else alert('ডিলিট করা যায়নি!');
     } catch (e) { alert('Error: ' + e); }
   };
@@ -115,8 +156,8 @@ export default function ProductsPage() {
 
       {/* Search */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-gray-100">
-          <div className="relative max-w-sm">
+        <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
+          <div className="relative w-full sm:max-w-sm">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
@@ -126,6 +167,14 @@ export default function ProductsPage() {
               className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5]"
             />
           </div>
+          <select 
+            value={selectedCategory}
+            onChange={e => setSelectedCategory(e.target.value)}
+            className="w-full sm:w-auto px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] bg-white"
+          >
+            <option value="">All Categories</option>
+            {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+          </select>
         </div>
 
         {/* Table */}
@@ -155,7 +204,7 @@ export default function ProductsPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       {product.image ? (
-                        <img src={product.image} className="w-10 h-10 rounded-lg object-cover border border-gray-100 bg-gray-50" alt={product.name} />
+                        <img src={product.image.startsWith('/') ? `http://167.233.34.127:3000${product.image}` : product.image} className="w-10 h-10 rounded-lg object-cover border border-gray-100 bg-gray-50" alt={product.name} />
                       ) : (
                         <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center"><Package size={16} className="text-gray-300" /></div>
                       )}
@@ -222,12 +271,24 @@ export default function ProductsPage() {
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1.5">Category *</label>
                 <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5]">
-                  {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Image Path</label>
-                <input value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5]" placeholder="/images/product_hilsa.jpg" />
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Product Image *</label>
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={handleFileUpload} 
+                  disabled={uploading}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" 
+                />
+                {uploading && <p className="text-xs text-indigo-600 mt-1">Uploading...</p>}
+                {form.image && !uploading && (
+                  <div className="mt-2">
+                    <img src={form.image} alt="Preview" className="h-16 w-16 object-cover rounded-lg border border-gray-200" />
+                  </div>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -277,5 +338,13 @@ export default function ProductsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="p-12 text-center text-gray-500">Loading...</div>}>
+      <ProductsContent />
+    </Suspense>
   );
 }

@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Search, Filter, MoreVertical, Edit2, Trash2 } from 'lucide-react';
-import clsx from 'clsx';
 
 interface Column {
   key: string;
@@ -25,6 +24,54 @@ export default function DataTable({
   onEdit,
   onDelete
 }: DataTableProps) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Search logic: check if any value in the row matches the search term
+  const filteredData = useMemo(() => {
+    if (!searchTerm.trim()) return data;
+    const lowerSearch = searchTerm.toLowerCase();
+    return data.filter(item => {
+      return Object.values(item).some(val => 
+        String(val).toLowerCase().includes(lowerSearch)
+      );
+    });
+  }, [data, searchTerm]);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  
+  // Ensure current page is valid after filtering
+  if (currentPage > totalPages && totalPages > 0) {
+    setCurrentPage(totalPages);
+  } else if (currentPage === 0 && totalPages > 0) {
+    setCurrentPage(1);
+  }
+
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredData.slice(start, start + itemsPerPage);
+  }, [filteredData, currentPage]);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const getPageNumbers = () => {
+    const pages = [];
+    let start = Math.max(1, currentPage - 1);
+    let end = Math.min(totalPages, start + 2);
+    if (end - start < 2) {
+      start = Math.max(1, end - 2);
+    }
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  };
+
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
       {/* Table Toolbar */}
@@ -34,6 +81,11 @@ export default function DataTable({
           <input 
             type="text" 
             placeholder={searchPlaceholder}
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
             className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5]"
           />
         </div>
@@ -56,14 +108,14 @@ export default function DataTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {data.length === 0 ? (
+            {paginatedData.length === 0 ? (
               <tr>
                 <td colSpan={columns.length + 1} className="px-6 py-12 text-center text-gray-500">
-                  No data available.
+                  {data.length === 0 ? 'No data available.' : 'No matching results found.'}
                 </td>
               </tr>
             ) : (
-              data.map((item, rowIndex) => (
+              paginatedData.map((item, rowIndex) => (
                 <tr key={rowIndex} className="hover:bg-gray-50/50 transition-colors">
                   {columns.map((col, colIndex) => (
                     <td key={colIndex} className="px-6 py-4">
@@ -83,9 +135,6 @@ export default function DataTable({
                             <Trash2 size={16} />
                           </button>
                         )}
-                        <button className="p-1.5 text-gray-400 hover:text-gray-700 rounded-md hover:bg-gray-100 transition-colors">
-                          <MoreVertical size={16} />
-                        </button>
                       </div>
                     </td>
                   )}
@@ -97,15 +146,35 @@ export default function DataTable({
       </div>
 
       {/* Pagination */}
-      {data.length > 0 && (
+      {filteredData.length > 0 && (
         <div className="p-4 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
-          <div>Showing 1 to {data.length} of {data.length} entries</div>
+          <div>
+            Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length} entries
+          </div>
           <div className="flex gap-1">
-            <button className="px-3 py-1 border border-gray-200 rounded text-gray-400 cursor-not-allowed">Previous</button>
-            <button className="px-3 py-1 bg-[#4F46E5] text-white rounded">1</button>
-            <button className="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50">2</button>
-            <button className="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50">3</button>
-            <button className="px-3 py-1 border border-gray-200 rounded hover:bg-gray-50">Next</button>
+            <button 
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-1 border border-gray-200 rounded disabled:text-gray-300 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              Previous
+            </button>
+            {getPageNumbers().map(num => (
+              <button 
+                key={num}
+                onClick={() => handlePageChange(num)}
+                className={`px-3 py-1 rounded ${currentPage === num ? 'bg-[#4F46E5] text-white' : 'border border-gray-200 hover:bg-gray-50'}`}
+              >
+                {num}
+              </button>
+            ))}
+            <button 
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 border border-gray-200 rounded disabled:text-gray-300 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              Next
+            </button>
           </div>
         </div>
       )}

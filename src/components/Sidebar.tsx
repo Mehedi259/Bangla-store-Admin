@@ -15,6 +15,7 @@ const menuGroups = [
     title: 'MANAGE',
     items: [
       { name: 'Orders', icon: ShoppingCart, path: '/orders' },
+      { name: 'Categories', icon: Layers, path: '/categories' },
       { name: 'Products', icon: Package, path: '/products' },
     ]
   }

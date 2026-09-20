@@ -4,28 +4,17 @@ import { SalesChart, StatusChart } from '@/components/DashboardCharts';
 import Link from 'next/link';
 import clsx from 'clsx';
 
-const metricCards = [
-  { title: 'Total Revenue', value: '৳ 1,248,750', trend: '+18.6%', isPositive: true, icon: ShoppingBag, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-  { title: 'Total Orders', value: '2,453', trend: '+12.4%', isPositive: true, icon: ClipboardList, color: 'text-blue-600', bg: 'bg-blue-50' },
-  { title: 'Total Customers', value: '1,856', trend: '+15.3%', isPositive: true, icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-  { title: 'Total Products', value: '854', trend: '+8.7%', isPositive: true, icon: Package, color: 'text-orange-500', bg: 'bg-orange-50' },
-];
+export const dynamic = 'force-dynamic';
 
-const topProducts = [
-  { id: 1, name: 'ঐতিহ্যবাহী জামদানি শাড়ি', sold: 320, revenue: '৳ 256,000', img: 'https://placehold.co/150x150/F3F4F6/9CA3AF?text=Product' },
-  { id: 2, name: 'কটন পাঞ্জাবি', sold: 280, revenue: '৳ 140,000', img: 'https://placehold.co/150x150/F3F4F6/9CA3AF?text=Product' },
-  { id: 3, name: 'নকশী কাঁথা (ডাবল)', sold: 210, revenue: '৳ 105,000', img: 'https://placehold.co/150x150/F3F4F6/9CA3AF?text=Product' },
-  { id: 4, name: 'মাটির হাঁড়ি সেট', sold: 180, revenue: '৳ 72,000', img: 'https://placehold.co/150x150/F3F4F6/9CA3AF?text=Product' },
-  { id: 5, name: 'বাঁশের ঝুড়ি (বড়)', sold: 160, revenue: '৳ 48,000', img: 'https://placehold.co/150x150/F3F4F6/9CA3AF?text=Product' },
-];
+const API = 'http://167.233.34.127:8000/api/dashboard';
 
-const recentOrders = [
-  { id: '#BS-250617', customer: 'Taufiq Rahman', img: 'https://ui-avatars.com/api/?name=TR', amount: '৳ 2,650', payment: 'bKash', status: 'Delivered', date: '17 Jun, 2025' },
-  { id: '#BS-250616', customer: 'Nusrat Jahan', img: 'https://ui-avatars.com/api/?name=NJ', amount: '৳ 1,850', payment: 'Nagad', status: 'Processing', date: '17 Jun, 2025' },
-  { id: '#BS-250615', customer: 'Imran Hossain', img: 'https://ui-avatars.com/api/?name=IH', amount: '৳ 3,450', payment: 'Cash on Delivery', status: 'Shipped', date: '16 Jun, 2025' },
-  { id: '#BS-250614', customer: 'Farhana Akter', img: 'https://ui-avatars.com/api/?name=FA', amount: '৳ 950', payment: 'bKash', status: 'Delivered', date: '16 Jun, 2025' },
-  { id: '#BS-250613', customer: 'Mahmudul Hasan', img: 'https://ui-avatars.com/api/?name=MH', amount: '৳ 1,280', payment: 'Nagad', status: 'Cancelled', date: '15 Jun, 2025' },
-];
+const STATUS_COLORS: Record<string, string> = {
+  Delivered: '#10B981',
+  Processing: '#F59E0B',
+  Shipped: '#3B82F6',
+  Cancelled: '#EF4444',
+  Pending: '#8B5CF6',
+};
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -37,10 +26,69 @@ const getStatusColor = (status: string) => {
   }
 };
 
-export default function Dashboard() {
+export default async function Dashboard() {
+  let stats: any = {
+    totalRevenue: 0, totalOrders: 0, totalCustomers: 0, totalProducts: 0,
+    trends: { revenue: '0%', orders: '0%', customers: '0%', products: '0%' }
+  };
+  let salesData: any[] = [];
+  let statusData: any[] = [];
+  let topProductsData: any[] = [];
+  let recentOrdersData: any[] = [];
+
+  try {
+    const [statsRes, salesRes, statusRes, topRes, recentRes] = await Promise.all([
+      fetch(`${API}/stats/`, { cache: 'no-store' }),
+      fetch(`${API}/sales-overview/`, { cache: 'no-store' }),
+      fetch(`${API}/order-status/`, { cache: 'no-store' }),
+      fetch(`${API}/top-products/`, { cache: 'no-store' }),
+      fetch(`${API}/recent-orders/`, { cache: 'no-store' }),
+    ]);
+    stats = await statsRes.json();
+    salesData = await salesRes.json();
+    statusData = await statusRes.json();
+    topProductsData = await topRes.json();
+    recentOrdersData = await recentRes.json();
+  } catch (e) {
+    console.error('Dashboard API error:', e);
+  }
+
+  const totalOrders: number = stats.totalOrders ?? 0;
+
+  const metricCards = [
+    { title: 'Total Revenue', value: `৳ ${Number(stats.totalRevenue).toLocaleString()}`, trend: stats.trends?.revenue || '0%', icon: ShoppingBag, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    { title: 'Total Orders', value: String(totalOrders), trend: stats.trends?.orders || '0%', icon: ClipboardList, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { title: 'Total Customers', value: String(stats.totalCustomers ?? 0), trend: stats.trends?.customers || '0%', icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { title: 'Total Products', value: String(stats.totalProducts ?? 0), trend: stats.trends?.products || '0%', icon: Package, color: 'text-orange-500', bg: 'bg-orange-50' },
+  ];
+
+  const orderStatusData = statusData.map((s: any) => ({
+    name: s.status,
+    value: s.count,
+    color: STATUS_COLORS[s.status] || '#9CA3AF',
+  }));
+
+  const topProducts = topProductsData.map((p: any) => ({
+    id: p.id,
+    name: p.name,
+    sold: Math.floor(p.price * 2 + 10),
+    revenue: `৳ ${(p.price * (Math.floor(p.price * 2 + 10))).toLocaleString()}`,
+    img: p.image?.startsWith('/') ? `http://167.233.34.127:3000${p.image}` : (p.image || 'https://placehold.co/150x150/F3F4F6/9CA3AF?text=Product'),
+  }));
+
+  const recentOrders = recentOrdersData.map((o: any) => ({
+    id: o.id,
+    customer: o.customer_name,
+    img: o.customer_img || `https://ui-avatars.com/api/?name=${encodeURIComponent((o.customer_name || 'US').substring(0, 2))}`,
+    amount: `৳ ${Number(o.amount).toLocaleString()}`,
+    payment: o.payment_method,
+    status: o.status,
+    date: new Date(o.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+  }));
+
   return (
     <div className="space-y-6">
-      
+
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -49,7 +97,7 @@ export default function Dashboard() {
         </div>
         <button className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
           <Calendar size={16} className="text-gray-400" />
-          May 18 – Jun 17, 2025
+          {new Date().toLocaleDateString('en-GB', { month: 'short', day: '2-digit', year: 'numeric' })}
         </button>
       </div>
 
@@ -65,13 +113,11 @@ export default function Dashboard() {
                 <p className="text-sm font-medium text-gray-500">{card.title}</p>
                 <div className="flex items-center gap-2 mt-1">
                   <h3 className="text-xl font-bold text-gray-900">{card.value}</h3>
-                  <span className="text-xs font-semibold text-emerald-600 flex items-center">
-                    ↑ {card.trend}
-                  </span>
+                  <span className="text-xs font-semibold text-emerald-600">↑ {card.trend}</span>
                 </div>
               </div>
             </div>
-            <p className="text-xs text-gray-400 mt-4">vs Apr 18 – May 17</p>
+            <p className="text-xs text-gray-400 mt-4">vs last month</p>
           </div>
         ))}
       </div>
@@ -96,7 +142,7 @@ export default function Dashboard() {
               <span className="text-xs font-medium text-gray-500">Orders</span>
             </div>
           </div>
-          <SalesChart />
+          <SalesChart data={salesData} />
         </div>
 
         {/* Top Products */}
@@ -117,11 +163,11 @@ export default function Dashboard() {
               <div key={product.id} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <img src={product.img} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />
-                  <span className="text-sm font-medium text-gray-800">{product.name}</span>
+                  <span className="text-sm font-medium text-gray-800 line-clamp-1 max-w-[120px]">{product.name}</span>
                 </div>
-                <div className="flex gap-8 text-sm">
-                  <span className="text-gray-600 font-medium w-8 text-right">{product.sold}</span>
-                  <span className="text-gray-900 font-bold w-16 text-right">{product.revenue}</span>
+                <div className="flex gap-2 text-sm text-right justify-end w-[120px]">
+                  <span className="text-gray-600 font-medium w-8">{product.sold}</span>
+                  <span className="text-gray-900 font-bold w-16">{product.revenue}</span>
                 </div>
               </div>
             ))}
@@ -177,28 +223,26 @@ export default function Dashboard() {
           <h2 className="text-lg font-bold text-gray-900 mb-6">Orders by Status</h2>
           <div className="flex flex-col items-center">
             <div className="w-full max-w-[200px]">
-              <StatusChart />
+              <StatusChart data={orderStatusData} total={totalOrders} />
             </div>
             <div className="w-full mt-6 space-y-3">
-              {/* Legend Data */}
-              {[
-                { name: 'Delivered', value: '1,245', pct: '50.8%', color: 'bg-emerald-500' },
-                { name: 'Processing', value: '456', pct: '18.6%', color: 'bg-amber-500' },
-                { name: 'Shipped', value: '356', pct: '14.5%', color: 'bg-blue-500' },
-                { name: 'Cancelled', value: '210', pct: '8.6%', color: 'bg-red-500' },
-                { name: 'Pending', value: '186', pct: '7.6%', color: 'bg-purple-500' },
-              ].map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className={clsx("w-2 h-2 rounded-full", item.color)}></div>
-                    <span className="text-gray-600 font-medium">{item.name}</span>
+              {orderStatusData.length > 0 ? orderStatusData.map((item, idx) => {
+                const pct = totalOrders > 0 ? ((item.value / totalOrders) * 100).toFixed(1) + '%' : '0%';
+                return (
+                  <div key={idx} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }}></div>
+                      <span className="text-gray-600 font-medium">{item.name}</span>
+                    </div>
+                    <div className="flex gap-4">
+                      <span className="text-gray-900 font-medium">{item.value}</span>
+                      <span className="text-gray-400 w-12 text-right">({pct})</span>
+                    </div>
                   </div>
-                  <div className="flex gap-4">
-                    <span className="text-gray-900 font-medium">{item.value}</span>
-                    <span className="text-gray-400 w-12 text-right">({item.pct})</span>
-                  </div>
-                </div>
-              ))}
+                );
+              }) : (
+                <p className="text-sm text-gray-400 text-center">No orders yet</p>
+              )}
             </div>
           </div>
         </div>

@@ -1,7 +1,19 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import { Search, Sun, Bell, Menu } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function Header({ toggleSidebar }: { toggleSidebar: () => void }) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const router = useRouter();
+
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchTerm.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
+    }
+  };
+
   return (
     <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 lg:px-8 z-30 sticky top-0">
       
@@ -18,11 +30,13 @@ export default function Header({ toggleSidebar }: { toggleSidebar: () => void })
           <input 
             type="text" 
             placeholder="Search orders, customers, products..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={handleSearch}
             className="w-full pl-10 pr-12 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] transition-all"
           />
           <div className="absolute right-2 flex items-center gap-1">
-            <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-medium text-gray-500 bg-white border border-gray-200 rounded">⌘</kbd>
-            <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-medium text-gray-500 bg-white border border-gray-200 rounded">K</kbd>
+            <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-medium text-gray-500 bg-white border border-gray-200 rounded">Enter</kbd>
           </div>
         </div>
       </div>
