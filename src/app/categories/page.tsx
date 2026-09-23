@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import imageCompression from 'browser-image-compression';
 import { Plus, Edit2, Trash2, Layers, X } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import DataTable from '@/components/DataTable';
 
-const API_URL = 'http://167.233.34.127:8000/api/products/categories';
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://167.233.34.127:8000/api') + '/products/categories';
 
 const columns = [
   { 
@@ -14,8 +15,10 @@ const columns = [
     render: (val: string, item: any) => {
       const getImageUrl = (url: string) => {
         if (!url) return '';
-        if (url.startsWith('/images/')) return `http://167.233.34.127:3000${url}`;
-        if (url.startsWith('/media/')) return `http://167.233.34.127:8000${url}`;
+        const baseUrl = new URL(process.env.NEXT_PUBLIC_API_URL || 'http://167.233.34.127:8000/api').origin;
+        const frontendUrl = process.env.NEXT_PUBLIC_API_URL ? 'https://banglastoreandtabac.com' : 'http://167.233.34.127:3000';
+        if (url.startsWith('/images/')) return `${frontendUrl}${url}`;
+        if (url.startsWith('/media/')) return `${baseUrl}${url}`;
         return url;
       };
       return (
@@ -78,18 +81,30 @@ export default function CategoriesPage() {
     if (!file) return;
     
     setUploading(true);
-    const formData = new FormData();
-    formData.append('image', file);
-
+    
     try {
+      const options = {
+        maxSizeMB: 0.3, // compress to max 300KB
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      };
+      
+      const compressedFile = await imageCompression(file, options);
+      const fileToUpload = new File([compressedFile], file.name, { type: file.type });
+      
+      const formData = new FormData();
+      formData.append('image', fileToUpload);
+
       // Use the products upload endpoint
-      const res = await fetch(`http://167.233.34.127:8000/api/products/upload/`, {
+      const uploadUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://167.233.34.127:8000/api') + '/products/upload/';
+      const res = await fetch(uploadUrl, {
         method: 'POST',
         body: formData,
       });
       if (res.ok) {
         const data = await res.json();
-        const imageUrl = `http://167.233.34.127:8000${data.url}`;
+        const baseUrl = new URL(process.env.NEXT_PUBLIC_API_URL || 'http://167.233.34.127:8000/api').origin;
+        const imageUrl = `${baseUrl}${data.url}`;
         setForm({ ...form, image: imageUrl });
       } else {
         alert('Image upload failed');

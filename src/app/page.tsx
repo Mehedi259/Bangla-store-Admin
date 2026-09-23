@@ -6,7 +6,7 @@ import clsx from 'clsx';
 
 export const dynamic = 'force-dynamic';
 
-const API = 'http://167.233.34.127:8000/api/dashboard';
+const API = (process.env.NEXT_PUBLIC_API_URL || 'http://167.233.34.127:8000/api') + '/dashboard';
 
 const STATUS_COLORS: Record<string, string> = {
   Delivered: '#10B981',
@@ -73,7 +73,11 @@ export default async function Dashboard() {
     name: p.name,
     sold: Math.floor(p.price * 2 + 10),
     revenue: `৳ ${(p.price * (Math.floor(p.price * 2 + 10))).toLocaleString()}`,
-    img: p.image?.startsWith('/') ? `http://167.233.34.127:3000${p.image}` : (p.image || 'https://placehold.co/150x150/F3F4F6/9CA3AF?text=Product'),
+    img: p.image?.startsWith('/images/') 
+      ? `${process.env.NEXT_PUBLIC_API_URL ? 'https://banglastoreandtabac.com' : 'http://167.233.34.127:3000'}${p.image}` 
+      : p.image?.startsWith('/media/') 
+        ? `${(process.env.NEXT_PUBLIC_API_URL || 'http://167.233.34.127:8000/api').replace('/api', '')}${p.image}` 
+        : (p.image || 'https://placehold.co/150x150/F3F4F6/9CA3AF?text=Product'),
   }));
 
   const recentOrders = recentOrdersData.map((o: any) => ({

@@ -5,7 +5,7 @@ import { X, Trash2 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import DataTable from '@/components/DataTable';
 
-const API_URL = 'http://167.233.34.127:8000/api/orders';
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://167.233.34.127:8000/api') + '/orders';
 
 const columns = [
   { key: 'id', label: 'Order ID', render: (val: string) => <span className="font-medium text-[#4F46E5]">{val}</span> },

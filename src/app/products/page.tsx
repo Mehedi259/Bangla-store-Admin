@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useEffect, useState, Suspense } from 'react';
+import imageCompression from 'browser-image-compression';
 import { useSearchParams } from 'next/navigation';
 import { Plus, Edit2, Trash2, Search, X, Package } from 'lucide-react';
 
-const API_URL = 'http://167.233.34.127:8000/api/products';
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://167.233.34.127:8000/api') + '/products';
 
 const emptyForm = { id: '', name: '', price: '', weight: '', image: '', category: '', isBestSeller: false, stock: 100, status: 'Active' };
 
@@ -75,18 +76,28 @@ function ProductsContent() {
     if (!file) return;
     
     setUploading(true);
-    const formData = new FormData();
-    formData.append('image', file);
-
+    
     try {
+      const options = {
+        maxSizeMB: 0.3, // compress to max 300KB
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      };
+      
+      const compressedFile = await imageCompression(file, options);
+      const fileToUpload = new File([compressedFile], file.name, { type: file.type });
+      
+      const formData = new FormData();
+      formData.append('image', fileToUpload);
+
       const res = await fetch(`${API_URL}/upload/`, {
         method: 'POST',
         body: formData,
       });
       if (res.ok) {
         const data = await res.json();
-        // Django backend runs on 8000, so prepend the host to the relative media URL
-        const imageUrl = `http://167.233.34.127:8000${data.url}`;
+        const baseUrl = new URL(process.env.NEXT_PUBLIC_API_URL || 'http://167.233.34.127:8000/api').origin;
+        const imageUrl = `${baseUrl}${data.url}`;
         setForm({ ...form, image: imageUrl });
       } else {
         alert('Image upload failed');
@@ -100,6 +111,7 @@ function ProductsContent() {
 
   const handleSave = async () => {
     if (!form.name || !form.price || !form.category) return alert('নাম, দাম ও ক্যাটাগরি দিতে হবে!');
+    if (!form.image) return alert('অনুগ্রহ করে একটি ছবি আপলোড করুন!');
     setSaving(true);
     try {
       const payload = { ...form, price: parseFloat(form.price) };
@@ -204,7 +216,17 @@ function ProductsContent() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       {product.image ? (
-                        <img src={product.image.startsWith('/') ? `http://167.233.34.127:3000${product.image}` : product.image} className="w-10 h-10 rounded-lg object-cover border border-gray-100 bg-gray-50" alt={product.name} />
+                        <img 
+                          src={
+                            product.image.startsWith('/images/') 
+                              ? `${process.env.NEXT_PUBLIC_API_URL ? 'https://banglastoreandtabac.com' : 'http://167.233.34.127:3000'}${product.image}` 
+                              : product.image.startsWith('/media/')
+                                ? `${new URL(process.env.NEXT_PUBLIC_API_URL || 'http://167.233.34.127:8000/api').origin}${product.image}`
+                                : product.image
+                          } 
+                          className="w-10 h-10 rounded-lg object-cover border border-gray-100 bg-gray-50" 
+                          alt={product.name} 
+                        />
                       ) : (
                         <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center"><Package size={16} className="text-gray-300" /></div>
                       )}
